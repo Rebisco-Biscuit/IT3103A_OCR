@@ -1,0 +1,26 @@
+type Payment {
+  id: ID!
+  studentId: String!
+  amount: Float!
+  currency: String!
+  transactionId: String!
+  status: String!
+  createdAt: String!
+  refund: Refund # Added this field
+}
+
+type Refund {
+  id: ID!
+  paymentId: String!
+  reason: String!
+  issuedAt: String!
+}
+
+type Query {
+  getPayment(id: ID!): Payment
+}
+
+type Mutation {
+  createPayment(studentId: String!, amount: Float!, currency: String!): Payment!
+  processRefund(paymentId: ID!, reason: String!): Refund!
+}
