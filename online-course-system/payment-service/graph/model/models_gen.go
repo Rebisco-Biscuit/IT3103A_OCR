@@ -5,22 +5,23 @@ package model
 type Mutation struct {
 }
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type Payment struct {
+	ID            string  `json:"id"`
+	StudentID     string  `json:"studentId"`
+	Amount        float64 `json:"amount"`
+	Currency      string  `json:"currency"`
+	TransactionID string  `json:"transactionId"`
+	Status        string  `json:"status"`
+	CreatedAt     string  `json:"createdAt"`
+	Refund        *Refund `json:"refund,omitempty"`
 }
 
 type Query struct {
 }
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
-}
-
-type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type Refund struct {
+	ID        string `json:"id"`
+	PaymentID string `json:"paymentId"`
+	Reason    string `json:"reason"`
+	IssuedAt  string `json:"issuedAt"`
 }

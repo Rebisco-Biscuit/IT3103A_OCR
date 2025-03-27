@@ -5,8 +5,8 @@ type Payment {
   currency: String!
   transactionId: String!
   status: String!
-  createdAt: String!
-  refund: Refund # Added this field
+  createdAt: String!  # Fix this line
+  refund: Refund
 }
 
 type Refund {
@@ -21,6 +21,6 @@ type Query {
 }
 
 type Mutation {
-  createPayment(studentId: String!, amount: Float!, currency: String!): Payment!
-  processRefund(paymentId: ID!, reason: String!): Refund!
+  createPayment(studentId: String!, amount: Float!, currency: String!, transactionId: String!): Payment!
 }
+

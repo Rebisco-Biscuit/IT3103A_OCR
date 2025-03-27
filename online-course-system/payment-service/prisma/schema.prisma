@@ -1,7 +1,6 @@
 generator client {
-  provider = "prisma-client-go"
+  provider = "go run github.com/steebchen/prisma-client-go"
 }
-
 
 datasource db {
   provider = "postgresql"
@@ -14,16 +13,16 @@ model Payment {
   amount        Float
   currency      String
   transactionId String  @unique
-  status        String  @default("pending") // pending, completed, refunded
+  status        String
   createdAt     DateTime @default(now())
-
-  refund        Refund?  @relation() // No `fields` here
+  refund        Refund?
 }
 
 model Refund {
-  id          String  @id @default(uuid())
-  paymentId   String  @unique
-  reason      String
-  issuedAt    DateTime @default(now())
-  payment     Payment  @relation(fields: [paymentId], references: [id]) // Keep `fields` here
+  id        String  @id @default(uuid())
+  paymentId String  @unique
+  reason    String
+  issuedAt  DateTime @default(now())
+
+  payment   Payment @relation(fields: [paymentId], references: [id])
 }
