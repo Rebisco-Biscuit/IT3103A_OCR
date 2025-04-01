@@ -1,0 +1,28 @@
+type Payment {
+  id: ID!
+  studentId: String!
+  amount: Float!
+  currency: String!
+  transactionId: String!
+  status: String!
+  createdAt: String!
+}
+
+type MockPayment {
+  id: ID!
+  paymentMethod: String!
+  cardHolder: String
+  cardNumber: String
+  phoneNumber: String
+  expiryDate: String
+  cvv: String
+}
+
+type Query {
+  getPayment(id: ID!): Payment
+  listPayments: [Payment!]!
+}
+
+type Mutation {
+  createPayment(studentId: String!, amount: Float!, currency: String!, paymentMethod: String!, cardHolder: String, cardNumber: String, phoneNumber: String): Payment!
+}
