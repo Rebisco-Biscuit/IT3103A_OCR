@@ -2,28 +2,143 @@
 
 package model
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
 type MockPayment struct {
-	ID            string  `json:"id"`
-	PaymentMethod string  `json:"paymentMethod"`
-	CardHolder    *string `json:"cardHolder,omitempty"`
-	CardNumber    *string `json:"cardNumber,omitempty"`
-	PhoneNumber   *string `json:"phoneNumber,omitempty"`
-	ExpiryDate    *string `json:"expiryDate,omitempty"`
-	Cvv           *string `json:"cvv,omitempty"`
+	ID          string   `json:"id"`
+	CardHolder  *string  `json:"cardHolder,omitempty"`
+	CardNumber  *string  `json:"cardNumber,omitempty"`
+	PhoneNumber *string  `json:"phoneNumber,omitempty"`
+	Pin         *string  `json:"pin,omitempty"`
+	ExpiryDate  *string  `json:"expiryDate,omitempty"`
+	Cvv         *string  `json:"cvv,omitempty"`
+	Balance     *float64 `json:"balance,omitempty"`
+	IsValid     bool     `json:"isValid"`
+	CreatedAt   string   `json:"createdAt"`
+	UpdatedAt   string   `json:"updatedAt"`
 }
 
 type Mutation struct {
 }
 
 type Payment struct {
-	ID            string  `json:"id"`
-	StudentID     string  `json:"studentId"`
-	Amount        float64 `json:"amount"`
-	Currency      string  `json:"currency"`
-	TransactionID string  `json:"transactionId"`
-	Status        string  `json:"status"`
-	CreatedAt     string  `json:"createdAt"`
+	ID            string         `json:"id"`
+	StudentID     string         `json:"studentId"`
+	Items         []*PaymentItem `json:"items"`
+	TotalAmount   float64        `json:"totalAmount"`
+	TransactionID string         `json:"transactionId"`
+	PaymentMethod PaymentMethod  `json:"paymentMethod"`
+	Status        PaymentStatus  `json:"status"`
+	CreatedAt     string         `json:"createdAt"`
+	ErrorMessage  *string        `json:"errorMessage,omitempty"`
+}
+
+type PaymentHistory struct {
+	TransactionID string        `json:"transactionId"`
+	PaymentMethod PaymentMethod `json:"paymentMethod"`
+	CreatedAt     string        `json:"createdAt"`
+	CourseID      string        `json:"courseId"`
+	Price         float64       `json:"price"`
+	Status        PaymentStatus `json:"status"`
+}
+
+type PaymentItem struct {
+	CourseID string  `json:"courseId"`
+	Price    float64 `json:"price"`
+}
+
+type PaymentItemInput struct {
+	CourseID string  `json:"courseId"`
+	Price    float64 `json:"price"`
 }
 
 type Query struct {
+}
+
+type PaymentMethod string
+
+const (
+	PaymentMethodCard    PaymentMethod = "Card"
+	PaymentMethodEWallet PaymentMethod = "EWallet"
+)
+
+var AllPaymentMethod = []PaymentMethod{
+	PaymentMethodCard,
+	PaymentMethodEWallet,
+}
+
+func (e PaymentMethod) IsValid() bool {
+	switch e {
+	case PaymentMethodCard, PaymentMethodEWallet:
+		return true
+	}
+	return false
+}
+
+func (e PaymentMethod) String() string {
+	return string(e)
+}
+
+func (e *PaymentMethod) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PaymentMethod(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PaymentMethod", str)
+	}
+	return nil
+}
+
+func (e PaymentMethod) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type PaymentStatus string
+
+const (
+	PaymentStatusPending   PaymentStatus = "Pending"
+	PaymentStatusCompleted PaymentStatus = "Completed"
+	PaymentStatusFailed    PaymentStatus = "Failed"
+)
+
+var AllPaymentStatus = []PaymentStatus{
+	PaymentStatusPending,
+	PaymentStatusCompleted,
+	PaymentStatusFailed,
+}
+
+func (e PaymentStatus) IsValid() bool {
+	switch e {
+	case PaymentStatusPending, PaymentStatusCompleted, PaymentStatusFailed:
+		return true
+	}
+	return false
+}
+
+func (e PaymentStatus) String() string {
+	return string(e)
+}
+
+func (e *PaymentStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PaymentStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid paymentStatus", str)
+	}
+	return nil
+}
+
+func (e PaymentStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

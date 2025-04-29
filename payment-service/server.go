@@ -7,6 +7,8 @@ import (
 	"os"
 	"payment-mod/payment-service/graph"
 
+	"github.com/rs/cors"
+
 	_ "github.com/lib/pq"
 
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -22,12 +24,20 @@ const defaultPort = "8080"
 var db *sql.DB
 
 func main() {
+
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"}, // Allow your React app's origin
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+	})
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
 	}
 
-	dsn := "postgres://postgres:admin@localhost:5432/payment_service?sslmode=disable"
+	dsn := "postgres://postgres:admin@localhost:5432/payment-service?sslmode=disable"
 	var err error
 	db, err = sql.Open("postgres", dsn)
 	if err != nil {
@@ -42,7 +52,7 @@ func main() {
 
 	log.Println("Connected to PostgreSQL successfully! 🎉")
 
-	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db}}))
 
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
@@ -55,8 +65,8 @@ func main() {
 		Cache: lru.New[string](100),
 	})
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	http.Handle("/", c.Handler(playground.Handler("GraphQL playground", "/query")))
+	http.Handle("/query", c.Handler(srv))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
