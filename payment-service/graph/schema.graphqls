@@ -1,0 +1,79 @@
+enum paymentStatus {
+  Pending
+  Completed
+  Failed
+}
+
+enum PaymentMethod {
+  Card
+  EWallet
+}
+
+type PaymentItem {
+  courseId: String!
+  price: Float!
+}
+
+type Payment {
+  id: ID!
+  studentId: String!
+  items: [PaymentItem!]! # List of courses and their prices
+  totalAmount: Float! # Total amount for all items
+  transactionId: String!
+  paymentMethod: PaymentMethod!
+  status: paymentStatus!
+  createdAt: String!
+  errorMessage: String # Added field for storing error messages
+}
+
+type MockPayment {
+  id: ID!
+  cardHolder: String
+  cardNumber: String
+  phoneNumber: String
+  pin: String
+  expiryDate: String
+  cvv: String
+  balance: Float
+  isValid: Boolean!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Query {
+  getPayment(id: ID!): Payment
+  listPayments: [Payment!]!
+}
+
+type Mutation {
+  createPayment(
+    studentId: String!,
+    items: [PaymentItemInput!]!, # Accepts multiple courses and prices
+    paymentMethod: PaymentMethod!,
+    cardHolder: String,
+    cardNumber: String,
+    expiryDate: String,
+    cvv: String,
+    phoneNumber: String,
+    pin: String
+  ): Payment!
+}
+
+input PaymentItemInput {
+  courseId: String!
+  price: Float!
+}
+
+type PaymentHistory {
+  transactionId: String!
+  paymentMethod: PaymentMethod!
+  createdAt: String!
+  courseId: String!
+  price: Float!
+  status: paymentStatus!
+}
+
+extend type Query {
+  listPaymentHistory(studentId: String!): [PaymentHistory!]!
+}
+

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+    <link href='https://fonts.googleapis.com/css?family=Instrument Sans' rel='stylesheet'>
+    <style>
+
+      .navbar {
+        background-color: #7B3538; 
+        margin-bottom: 20px; 
+        z-index:1; 
+        position: sticky;
+        box-sizing: border-box;  
+        box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.35);
+      }
+      a.nav-link {
+          color: #c1bbbb
+      }
+
+      a.nav-link:hover {
+          color: #FCF5F5
+      }
+
+      .navbar-nav .nav-link.active, .navbar-nav .nav-link.show {
+        color: #FCF5F5;
+        }
+
+      body {
+          background-color: #FCF5F5;
+          font-family: 'Instrument Sans';
+          letter-spacing: 5%;
+          line-height: auto;
+      }
+
+        .table thead tr th {
+        background-color: #7B3538;
+        color: #FBFCF5;
+        font-weight: 200;
+        border: 1;
+        box-shadow: 0px, 5px, 10px rgba(0,0,0,0.35);
+        }
+
+        .table td {
+            background-color: #EEE7E7;
+        }
+
+        .table tr {
+            border-bottom: #7B3538;
+        }
+
+        button.btn {
+            background-color: #7B3538;
+            color: #FBFCF5;
+        }
+
+        .btn:hover {
+            background-color: #5A2224;
+            color: #FBFCF5;
+        }
+
+        input#cvv.form-control {
+          width:70%;
+        }
+
+        
+        .btn.disabled, .btn:disabled, fieldset:disabled .btn {
+            background-color: #b68587;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="/lion.png" alt="lionheart" width="30" height="30">
+            </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Payment Related
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#">Cart</a></li>
+                  <li><a class="dropdown-item" href="#">History</a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- page title -->
+      <div class="container" style="margin-bottom: 20px;">
+        <div class="row">
+          <div class="col-sm-8">
+            <h4 style="font-weight: 500;">Jane Doe</h4> <!-- replace with user's logged in name-->
+            <h6>Transaction history for Jane Doe</h6>
+          </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>TXN #</th>
+                    <th>Method</th>
+                    <th>Paid At</th>
+                    <th>Course ID</th>
+                    <th class="text-end">Price</th>
+                </tr>
+            </thead>
+            <tbody id="transaction-table-body">
+                <!-- Rows will be dynamically inserted by JavaScript -->
+            </tbody>
+        </table>
+    
+        <!-- Pagination Buttons -->
+        <div style="margin-top: 25px; display: flex; justify-content: center; align-items: center; gap: 10px;">
+            <button type="button" class="btn" id="prev-btn">Previous</button>
+            <span id="page-indicator">Page 1</span>
+            <button type="button" class="btn" id="next-btn">Next</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+    const rowsPerPage = 8;
+    let currentPage = 1;
+
+    // Sample data for demonstration
+    const transactions = Array.from({ length: 25 }, (_, index) => ({
+        txn: `x Course00${index + 1}`,
+        method: "Otto",
+        paidAt: "Otto",
+        courseId: "Otto",
+        price: "@mdo"
+    }));
+
+    const tableBody = document.getElementById("transaction-table-body");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const pageIndicator = document.getElementById("page-indicator");
+
+    function renderTable() {
+        tableBody.innerHTML = ""; // Clear existing rows
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+
+        const currentTransactions = transactions.slice(start, end);
+        currentTransactions.forEach((transaction) => {
+            const row = `
+                <tr>
+                    <td>${transaction.txn}</td>
+                    <td>${transaction.method}</td>
+                    <td>${transaction.paidAt}</td>
+                    <td>${transaction.courseId}</td>
+                    <td class="text-end">${transaction.price}</td>
+                </tr>
+            `;
+            tableBody.insertAdjacentHTML("beforeend", row);
+        });
+
+        // Update button states and page indicator
+        pageIndicator.textContent = `Page ${currentPage}`;
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = end >= transactions.length;
+    }
+
+    // Pagination controls
+    prevBtn.addEventListener("click", () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+        }
+    });
+
+    nextBtn.addEventListener("click", () => {
+        if (currentPage * rowsPerPage < transactions.length) {
+            currentPage++;
+            renderTable();
+        }
+    });
+
+    // Initial render
+    renderTable();
+});
+    </script>
+
+
+    <!-- if student is not enrolled to any courses/cart is empty -->
+<!--
+    <div class="container">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Course ID</th>
+                <th>Course Description</th>
+                <th class="text-end">Price</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="3" class="text-center">
+                        <img src="/openbook.png" alt="openbook" width="175" height="auto" style="margin-bottom: 40px; margin-top: 50px;">
+                        <br/>Looks like your cart is empty. <br/>
+                        <a style="color:#7B3538; font-weight: 600; text-decoration: none;" href="#">Enroll here</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+  -->
+</body>
+</html>
+
+<script>
+  document.getElementById('btnradio1').addEventListener('click', function () {
+    document.getElementById('ewalletFields').style.display = 'flex';
+    document.getElementById('cardFields').style.display = 'none';
+  });
+  
+  document.getElementById('btnradio2').addEventListener('click', function () {
+    document.getElementById('cardFields').style.display = 'block';
+    document.getElementById('ewalletFields').style.display = 'none';
+  });
+</script>

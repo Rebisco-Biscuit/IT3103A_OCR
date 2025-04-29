@@ -1,0 +1,111 @@
+.navbar {
+  background-color: #7B3538; 
+  margin-bottom: 20px; 
+  z-index:1; 
+  position: sticky;
+  box-sizing: border-box;  
+  box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.35);
+  }
+  a.nav-link {
+    color: #c1bbbb;
+  }
+  a.nav-link:hover {
+    color: #FCF5F5 !important;
+  }
+  .navbar-nav .nav-link.active, .navbar-nav .nav-link.show {
+    color: #FCF5F5 !important;
+  }
+
+  body {
+    background-color: #FCF5F5 !important;
+    font-family: 'Instrument Sans', sans-serif !important;
+    line-height: 1.5 !important;
+  }
+  
+  .table thead tr th {
+    background-color: #7B3538;
+    color: #FBFCF5;
+    font-weight: 200;
+  }
+  .table td {
+    background-color: #EEE7E7 !important;
+  }
+  .table tr {
+    border-bottom: 1px solid #7B3538;
+  }
+
+  button.btn {
+    background-color: #7B3538;
+    color: #FBFCF5;
+  }
+
+  h6 {
+    font-weight: 400;
+  }
+
+  input#cvv.form-control {
+    width: 70%;
+  }
+
+  .modal-header {
+    border-bottom: none;
+  }
+  
+  .modal-title {
+    color: #7B3538;
+    font-weight: 700;
+  }
+  
+  .modal-body p {
+    margin-top: -30px;
+    font-size: 12px;
+  }
+  
+  .btn-group label.btn {
+    margin-left: 15px;
+  }
+  
+  #ewalletFields, #cardFields {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  #cardFields {
+    flex-direction: column;
+  }
+  
+  .cvv&expiryInputs {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+
+  .modal-footer {
+    justify-content: space-between;
+  }
+  
+  .modal-footer p {
+    font-size: 10px;
+  }
+  
+  .modal-footer b {
+    font-size: 20px;
+    font-weight: 700;
+    color: #7B3538;
+  }
+  
+  .btn.disabled, .btn:disabled, fieldset:disabled .btn {
+    background-color: #b06264 !important;
+    color: black !important;
+  }
+
+  .centerbtn {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    row-gap: 10px;
+    column-gap: 10px;
+  }
