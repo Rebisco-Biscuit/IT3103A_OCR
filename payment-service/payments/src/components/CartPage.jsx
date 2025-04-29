@@ -6,7 +6,7 @@ import EmptyCart from './EmptyCart'; // <- nukes the cart after successful payme
 
 export default function CartPage() {
   const [cartItems, setCartItems] = useState([
-    { id: 'Course006', description: 'Otto', price: '100.00' },
+    { id: 'Course008', description: 'Otto', price: '9999.00' },
   ]);
 
   // Calculate total price dynamically
