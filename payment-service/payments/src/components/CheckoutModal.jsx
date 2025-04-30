@@ -69,19 +69,19 @@ export default function CheckoutModal({ user, totalPrice, cartItems = [], onPaym
     console.log("Cart items:", cartItems); // Debugging log to check cartItems structure
 
     const items = cartItems.map((course) => {
-      const price = course.price ? parseFloat(course.price) : 0; // Fallback to 0 if price is missing or invalid
+      const price = course.price ? parseFloat(course.price) : 0;
 
       if (isNaN(price)) {
-        console.warn(`Invalid price for courseId ${course.id}:`, course.price); // Debugging log for invalid prices
+        console.warn(`Invalid price for courseId ${course.id}:`, course.price);
       }
 
       return {
         courseId: course.id,
-        price: isNaN(price) ? 0 : price, // Ensure price is a valid number
+        price: isNaN(price) ? 0 : price,
       };
     });
 
-    console.log("Mapped items:", items); // Debugging log to verify the mapped items
+    console.log("Mapped items:", items);
 
     let variables = {
       studentId,
