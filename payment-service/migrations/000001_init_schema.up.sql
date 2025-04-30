@@ -6,9 +6,9 @@ CREATE TABLE mock_payments (
     phone_number TEXT UNIQUE,
     expiry_date TEXT, -- Made nullable to support EWallet entries
     cvv TEXT,
-    balance DECIMAL(10,2) DEFAULT 0 CHECK (balance >= 0), -- Added balance field
-    pin TEXT, -- Added pin for EWallet validation
-    is_valid BOOLEAN DEFAULT TRUE, -- Added is_valid field
+    balance DECIMAL(10,2) DEFAULT 0 CHECK (balance >= 0),
+    pin TEXT, -- for EWallet validation
+    is_valid BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -18,12 +18,12 @@ CREATE TABLE payments (
     id SERIAL PRIMARY KEY,
     student_id TEXT NOT NULL,
     payment_method TEXT NOT NULL CHECK (payment_method IN ('Card', 'EWallet')), -- Simplified payment methods
-    total_amount DECIMAL(10,2) NOT NULL CHECK (total_amount > 0), -- Renamed from amount to total_amount
+    total_amount DECIMAL(10,2) NOT NULL CHECK (total_amount > 0),
     transaction_id TEXT UNIQUE NOT NULL,
     status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'failed')), -- Payment status
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    error_message TEXT -- Added error_message field for failed payments
+    error_message TEXT -- error_message for failed payments
 );
 
 -- Create Payment Items Table (Stores individual items for each payment)
