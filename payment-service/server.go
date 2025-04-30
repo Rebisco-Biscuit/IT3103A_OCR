@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"payment-mod/payment-service/graph"
+	"payment-mod/payment-service/graph/model"
+	"time"
 
 	"github.com/rs/cors"
 
@@ -50,9 +52,18 @@ func main() {
 		log.Fatal("Database connection is not alive:", err)
 	}
 
-	log.Println("Connected to PostgreSQL successfully! 🎉")
+	log.Println("Connected to PostgreSQL successfully")
 
-	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db}}))
+	srv := handler.New(graph.NewExecutableSchema(graph.Config{
+		Resolvers: &graph.Resolver{
+			DB:                     db,
+			PaymentCreatedChannels: make(map[string]chan *model.Payment),
+		},
+	}))
+
+	srv.AddTransport(transport.Websocket{
+		KeepAlivePingInterval: 10 * time.Second,
+	})
 
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})

@@ -59,6 +59,9 @@ type PaymentItemInput struct {
 type Query struct {
 }
 
+type Subscription struct {
+}
+
 type PaymentMethod string
 
 const (
