@@ -5,11 +5,11 @@ import { createClient } from 'graphql-ws';
 import { getMainDefinition } from '@apollo/client/utilities';
 
 const httpLink = new HttpLink({
-  uri: 'http://localhost:8080/query', // your HTTP endpoint
+  uri: 'http://localhost:8080/query', // HTTP endpoint
 });
 
 const wsLink = new GraphQLWsLink(createClient({
-  url: 'ws://localhost:8080/query', // your WebSocket endpoint
+  url: 'ws://localhost:8080/query', // WebSocket endpoint
 }));
 
 const splitLink = split(

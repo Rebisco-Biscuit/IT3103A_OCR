@@ -9,6 +9,7 @@ import (
 	"payment-mod/payment-service/graph/model"
 	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/rs/cors"
 
 	_ "github.com/lib/pq"
@@ -28,7 +29,7 @@ var db *sql.DB
 func main() {
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"}, // Allow your React app's origin
+		AllowedOrigins:   []string{"http://localhost:3000", "ws://localhost:3000"},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
@@ -63,6 +64,11 @@ func main() {
 
 	srv.AddTransport(transport.Websocket{
 		KeepAlivePingInterval: 10 * time.Second,
+		Upgrader: websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				return true // Allow all origins
+			},
+		},
 	})
 
 	srv.AddTransport(transport.Options{})
@@ -80,5 +86,6 @@ func main() {
 	http.Handle("/query", c.Handler(srv))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	log.Printf("connect to ws://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

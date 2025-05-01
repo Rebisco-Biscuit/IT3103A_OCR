@@ -41,49 +41,54 @@ const History = () => {
   });
 
   // Subscribe to new payments
-  const { data: subData } = useSubscription(PAYMENT_CREATED, {
+  const { data: subData, error: subError } = useSubscription(PAYMENT_CREATED, {
     variables: { studentId },
   });
 
   // On initial query load
   useEffect(() => {
+    console.log("Query Data:", queryData); // Debugging query data
     if (queryData?.listPaymentHistory) {
-      const flatHistory = queryData.listPaymentHistory.flatMap((p) =>
-        p.items.map((item) => ({
-          transactionId: p.transactionId,
-          paymentMethod: p.paymentMethod,
-          createdAt: p.createdAt,
-          courseId: item.courseId,
-          price: item.price,
-        }))
-      );
+      const flatHistory = queryData.listPaymentHistory.map((p) => ({
+        transactionId: p.transactionId,
+        paymentMethod: p.paymentMethod,
+        createdAt: p.createdAt,
+        courseId: p.courseId,
+        price: p.price,
+      }));
 
+      console.log("Flat History:", flatHistory); // Debugging flat history
       setPaymentHistory(flatHistory.reverse()); // newest on top
     }
   }, [queryData]);
 
   // On new payment received
   useEffect(() => {
+    console.log("Subscription Data:", subData); // Debugging subscription data
+    console.log("Subscription Error:", subError); // Debugging subscription error
     if (subData?.paymentCreated) {
       const p = subData.paymentCreated;
 
-      const newItems = p.items.map((item) => ({
+      const newPayment = {
         transactionId: p.transactionId,
         paymentMethod: p.paymentMethod,
         createdAt: p.createdAt,
-        courseId: item.courseId,
-        price: item.price,
-      }));
+        courseId: p.courseId,
+        price: p.price,
+      };
 
-      setPaymentHistory((prev) => [...newItems, ...prev]);
+      console.log("New Payment:", newPayment); // Debugging new payment
+      setPaymentHistory((prev) => [newPayment, ...prev]);
     }
-  }, [subData]);
+  }, [subData, subError]);
 
   if (queryLoading) return <p style={{ marginLeft: '20px' }}>Loading your broke ass...</p>;
   if (queryError) return <p style={{ marginLeft: '20px' }}>Failed to fetch data. Cry about it.</p>;
 
   const startIdx = (currentPage - 1) * rowsPerPage;
   const currentRows = paymentHistory.slice(startIdx, startIdx + rowsPerPage);
+
+  console.log("Current Rows:", currentRows); // Debugging current rows
 
   return (
     <div className="container mt-10">
@@ -104,17 +109,25 @@ const History = () => {
             </tr>
           </thead>
           <tbody>
-            {currentRows.map((item, index) => (
-              <tr key={index}>
-                <td>{item.transactionId}</td>
-                <td>{item.paymentMethod}</td>
-                <td className="text-center">
-                  {DateTime.fromISO(item.createdAt, { zone: "utc" }).toFormat("yyyy-MM-dd hh:mm a")}
+            {currentRows.length > 0 ? (
+              currentRows.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.transactionId}</td>
+                  <td>{item.paymentMethod}</td>
+                  <td className="text-center">
+                    {DateTime.fromISO(item.createdAt, { zone: "utc" }).toFormat("yyyy-MM-dd hh:mm a")}
+                  </td>
+                  <td className="text-center">{item.courseId}</td>
+                  <td className="text-end">₱{item.price.toFixed(2)}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="text-center">
+                  No data available
                 </td>
-                <td className="text-center">{item.courseId}</td>
-                <td className="text-end">₱{item.price.toFixed(2)}</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
