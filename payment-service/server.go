@@ -29,7 +29,7 @@ var db *sql.DB
 func main() {
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000", "ws://localhost:3000"},
+		AllowedOrigins:   []string{"http://localhost:3000", "websocket://localhost:3000", "ws://localhost:3000"},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
@@ -66,7 +66,9 @@ func main() {
 		KeepAlivePingInterval: 10 * time.Second,
 		Upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
-				return true // Allow all origins
+				origin := r.Header.Get("Origin")
+				log.Println("WebSocket request origin:", origin)
+				return origin == "http://localhost:3000" || origin == "http://localhost:8080"
 			},
 		},
 	})
@@ -86,6 +88,5 @@ func main() {
 	http.Handle("/query", c.Handler(srv))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Printf("connect to ws://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

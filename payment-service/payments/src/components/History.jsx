@@ -15,17 +15,21 @@ const GET_PAYMENT_HISTORY = gql`
   }
 `;
 
+
 const PAYMENT_CREATED = gql`
   subscription OnPaymentCreated($studentId: String!) {
     paymentCreated(studentId: $studentId) {
       transactionId
       paymentMethod
       createdAt
-      courseId
-      price
+      items {
+        courseId
+        price
+      }
     }
   }
 `;
+
 
 const History = () => {
   const studentId = '12345';
@@ -43,44 +47,43 @@ const History = () => {
   // Subscribe to new payments
   const { data: subData, error: subError } = useSubscription(PAYMENT_CREATED, {
     variables: { studentId },
+    fetchPolicy: 'network-only',
   });
 
   // On initial query load
   useEffect(() => {
-    console.log("Query Data:", queryData); // Debugging query data
     if (queryData?.listPaymentHistory) {
       const flatHistory = queryData.listPaymentHistory.map((p) => ({
         transactionId: p.transactionId,
         paymentMethod: p.paymentMethod,
         createdAt: p.createdAt,
-        courseId: p.courseId,
+        courseId: p.courseId.trim(),
         price: p.price,
+        status: p.status, // Include the status field
       }));
 
-      console.log("Flat History:", flatHistory); // Debugging flat history
-      setPaymentHistory(flatHistory.reverse()); // newest on top
+      setPaymentHistory(flatHistory.reverse());
     }
   }, [queryData]);
+  
 
   // On new payment received
   useEffect(() => {
-    console.log("Subscription Data:", subData); // Debugging subscription data
-    console.log("Subscription Error:", subError); // Debugging subscription error
     if (subData?.paymentCreated) {
       const p = subData.paymentCreated;
-
-      const newPayment = {
+  
+      const newPayments = p.items.map((item) => ({
         transactionId: p.transactionId,
         paymentMethod: p.paymentMethod,
         createdAt: p.createdAt,
-        courseId: p.courseId,
-        price: p.price,
-      };
-
-      console.log("New Payment:", newPayment); // Debugging new payment
-      setPaymentHistory((prev) => [newPayment, ...prev]);
+        courseId: item.courseId.trim(), // cleanup extra space
+        price: item.price,
+      }));
+  
+      setPaymentHistory((prev) => [...newPayments, ...prev]);
     }
   }, [subData, subError]);
+  
 
   if (queryLoading) return <p style={{ marginLeft: '20px' }}>Loading your broke ass...</p>;
   if (queryError) return <p style={{ marginLeft: '20px' }}>Failed to fetch data. Cry about it.</p>;
@@ -112,7 +115,7 @@ const History = () => {
             {currentRows.length > 0 ? (
               currentRows.map((item, index) => (
                 <tr key={index}>
-                  <td>{item.transactionId}</td>
+                  <td>{item.transactionId.replace('TXN-', '')}</td>
                   <td>{item.paymentMethod}</td>
                   <td className="text-center">
                     {DateTime.fromISO(item.createdAt, { zone: "utc" }).toFormat("yyyy-MM-dd hh:mm a")}

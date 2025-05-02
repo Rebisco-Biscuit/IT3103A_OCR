@@ -301,7 +301,7 @@ func (r *Resolver) ListPaymentHistory(ctx context.Context, studentID string) ([]
 		FROM payments p
 		JOIN payment_items pi ON p.id = pi.payment_id
 		WHERE p.student_id = $1 AND p.status = 'completed'
-		ORDER BY p.created_at DESC`, studentID)
+		ORDER BY p.created_at ASC`, studentID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query payment history: %w", err)
 	}
