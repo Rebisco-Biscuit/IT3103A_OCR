@@ -77,3 +77,6 @@ extend type Query {
   listPaymentHistory(studentId: String!): [PaymentHistory!]!
 }
 
+type Subscription {
+  paymentCreated(studentId: String!): Payment!
+}

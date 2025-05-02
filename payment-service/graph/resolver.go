@@ -5,12 +5,16 @@ import (
 	"database/sql"
 	"fmt"
 	"payment-mod/payment-service/graph/model"
+	"sync"
 	"time"
 )
 
 // Resolver serves as dependency injection for the app
 type Resolver struct {
 	DB *sql.DB // Database connection
+
+	Mu                     sync.Mutex
+	PaymentCreatedChannels map[string]chan *model.Payment
 }
 
 // Mutation Resolver
@@ -83,7 +87,19 @@ func (r *Resolver) CreatePayment(ctx context.Context, studentID string, items []
 		return nil, fmt.Errorf("unsupported payment method")
 	}
 
-	return r.insertPaymentWithItems(ctx, studentID, items, totalAmount, paymentMethod, status, "")
+	payment, err := r.insertPaymentWithItems(ctx, studentID, items, totalAmount, paymentMethod, status, "")
+	if err != nil {
+		return nil, err
+	}
+
+	// Publish the payment to the subscription channel
+	r.Mu.Lock()
+	if ch, ok := r.PaymentCreatedChannels[studentID]; ok {
+		ch <- payment
+	}
+	r.Mu.Unlock()
+
+	return payment, nil
 }
 
 // 2025 april 28 update: check if the course is already paid
@@ -285,7 +301,7 @@ func (r *Resolver) ListPaymentHistory(ctx context.Context, studentID string) ([]
 		FROM payments p
 		JOIN payment_items pi ON p.id = pi.payment_id
 		WHERE p.student_id = $1 AND p.status = 'completed'
-		ORDER BY p.created_at DESC`, studentID)
+		ORDER BY p.created_at ASC`, studentID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query payment history: %w", err)
 	}

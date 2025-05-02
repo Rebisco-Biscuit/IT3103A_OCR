@@ -6,7 +6,10 @@ import (
 	"net/http"
 	"os"
 	"payment-mod/payment-service/graph"
+	"payment-mod/payment-service/graph/model"
+	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/rs/cors"
 
 	_ "github.com/lib/pq"
@@ -26,7 +29,7 @@ var db *sql.DB
 func main() {
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"}, // Allow your React app's origin
+		AllowedOrigins:   []string{"http://localhost:3000", "websocket://localhost:3000", "ws://localhost:3000"},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
@@ -50,9 +53,25 @@ func main() {
 		log.Fatal("Database connection is not alive:", err)
 	}
 
-	log.Println("Connected to PostgreSQL successfully! 🎉")
+	log.Println("Connected to PostgreSQL successfully")
 
-	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db}}))
+	srv := handler.New(graph.NewExecutableSchema(graph.Config{
+		Resolvers: &graph.Resolver{
+			DB:                     db,
+			PaymentCreatedChannels: make(map[string]chan *model.Payment),
+		},
+	}))
+
+	srv.AddTransport(transport.Websocket{
+		KeepAlivePingInterval: 10 * time.Second,
+		Upgrader: websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				origin := r.Header.Get("Origin")
+				log.Println("WebSocket request origin:", origin)
+				return origin == "http://localhost:3000" || origin == "http://localhost:8080"
+			},
+		},
+	})
 
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
