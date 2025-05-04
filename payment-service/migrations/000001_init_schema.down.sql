@@ -12,4 +12,5 @@ DROP TABLE IF EXISTS payment_items;
 DROP TABLE IF EXISTS payments;
 DROP TABLE IF EXISTS mock_payments;
 
+
 -- migrate -database "postgres://postgres:admin@localhost:5432/payment-service?sslmode=disable" -path migrations up

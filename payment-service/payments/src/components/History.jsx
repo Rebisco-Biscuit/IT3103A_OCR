@@ -107,7 +107,7 @@ const History = () => {
               <th>TXN #</th>
               <th>Method</th>
               <th className="text-center">Paid At</th>
-              <th className="text-center">Course - ID</th>
+              <th className="text-center">Course ID</th>
               <th className="text-end">Price</th>
             </tr>
           </thead>
@@ -115,7 +115,7 @@ const History = () => {
             {currentRows.length > 0 ? (
               currentRows.map((item, index) => (
                 <tr key={index}>
-                  <td>{item.transactionId.replace('TXN-', '')}</td>
+                  <td style={{ color: '#7B3538', fontWeight: '700' }}>{item.transactionId.replace('TXN-', '')}</td>
                   <td>{item.paymentMethod}</td>
                   <td className="text-center">
                     {DateTime.fromISO(item.createdAt, { zone: "utc" }).toFormat("yyyy-MM-dd hh:mm a")}

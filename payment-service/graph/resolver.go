@@ -15,6 +15,7 @@ type Resolver struct {
 
 	Mu                     sync.Mutex
 	PaymentCreatedChannels map[string]chan *model.Payment
+	CartUpdatedChannels    map[string]chan []*model.CartItem
 }
 
 // Mutation Resolver
@@ -316,4 +317,136 @@ func (r *Resolver) ListPaymentHistory(ctx context.Context, studentID string) ([]
 		history = append(history, &record)
 	}
 	return history, nil
+}
+
+// 2025 MAY 5 UPDATE: cart...
+func (r *queryResolver) GetCart(ctx context.Context, studentId string) ([]*model.CartItem, error) {
+	rows, err := r.DB.Query(`
+        SELECT id, student_id, course_id, price, course_name, added_at
+        FROM cart
+        WHERE student_id = $1`, studentId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch cart items: %w", err)
+	}
+	defer rows.Close()
+
+	var cartItems []*model.CartItem
+	for rows.Next() {
+		var item model.CartItem
+		if err := rows.Scan(&item.ID, &item.StudentID, &item.CourseID, &item.Price, &item.CourseName, &item.AddedAt); err != nil {
+			return nil, fmt.Errorf("failed to scan cart item: %w", err)
+		}
+		cartItems = append(cartItems, &item)
+	}
+
+	return cartItems, nil
+}
+
+// 2025 MAY 5 UPDATE: RemoveFromCart mutation
+func (r *mutationResolver) RemoveFromCart(ctx context.Context, studentId string, courseId string) (bool, error) {
+	// Remove the item from the cart in the database
+	_, err := r.DB.Exec(`
+        DELETE FROM cart
+        WHERE student_id = $1 AND course_id = $2`, studentId, courseId)
+	if err != nil {
+		return false, fmt.Errorf("failed to remove item from cart: %w", err)
+	}
+
+	// Fetch the updated cart
+	rows, err := r.DB.Query(`
+        SELECT id, student_id, course_id, price, course_name, added_at
+        FROM cart
+        WHERE student_id = $1`, studentId)
+	if err != nil {
+		return false, fmt.Errorf("failed to fetch updated cart: %w", err)
+	}
+	defer rows.Close()
+
+	var updatedCart []*model.CartItem
+	for rows.Next() {
+		var item model.CartItem
+		if err := rows.Scan(&item.ID, &item.StudentID, &item.CourseID, &item.Price, &item.CourseName, &item.AddedAt); err != nil {
+			return false, fmt.Errorf("failed to scan updated cart item: %w", err)
+		}
+		updatedCart = append(updatedCart, &item)
+	}
+
+	// Notify subscribers of the updated cart
+	r.Mu.Lock()
+	if ch, exists := r.CartUpdatedChannels[studentId]; exists {
+		ch <- updatedCart
+	}
+	r.Mu.Unlock()
+
+	return true, nil
+}
+
+// 2025 MAY 5 UPDATE: AddToCart mutation
+func (r *mutationResolver) AddToCart(ctx context.Context, studentId string, courseId string, courseName string, price float64) (*model.CartItem, error) {
+	// Insert the item into the cart in the database
+	addedAt := time.Now().Format(time.RFC3339)
+	_, err := r.DB.Exec(`
+        INSERT INTO cart (student_id, course_id, course_name, price, added_at)
+        VALUES ($1, $2, $3, $4, $5)`, studentId, courseId, courseName, price, addedAt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to add item to cart: %w", err)
+	}
+
+	// Create the CartItem object
+	cartItem := &model.CartItem{
+		ID:         fmt.Sprintf("%s-%s", studentId, courseId), // Generate a unique ID
+		StudentID:  studentId,
+		CourseID:   courseId,
+		CourseName: courseName,
+		Price:      price,
+		AddedAt:    addedAt,
+	}
+
+	// Fetch the updated cart
+	rows, err := r.DB.Query(`
+        SELECT id, student_id, course_id, price, course_name, added_at
+        FROM cart
+        WHERE student_id = $1`, studentId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch updated cart: %w", err)
+	}
+	defer rows.Close()
+
+	var updatedCart []*model.CartItem
+	for rows.Next() {
+		var item model.CartItem
+		if err := rows.Scan(&item.ID, &item.StudentID, &item.CourseID, &item.Price, &item.CourseName, &item.AddedAt); err != nil {
+			return nil, fmt.Errorf("failed to scan updated cart item: %w", err)
+		}
+		updatedCart = append(updatedCart, &item)
+	}
+
+	// Notify subscribers of the updated cart
+	r.Mu.Lock()
+	if ch, exists := r.CartUpdatedChannels[studentId]; exists {
+		ch <- updatedCart
+	}
+	r.Mu.Unlock()
+
+	return cartItem, nil
+}
+
+// 2025 MAY 5 UPDATE: ClearCart mutation
+func (r *mutationResolver) ClearCart(ctx context.Context, studentId string) (bool, error) {
+	// Delete all items from the cart for the given studentId
+	_, err := r.DB.Exec(`
+        DELETE FROM cart
+        WHERE student_id = $1`, studentId)
+	if err != nil {
+		return false, fmt.Errorf("failed to clear cart: %w", err)
+	}
+
+	// Notify subscribers of the updated (empty) cart
+	r.Mu.Lock()
+	if ch, exists := r.CartUpdatedChannels[studentId]; exists {
+		ch <- []*model.CartItem{} // Send an empty cart to subscribers
+	}
+	r.Mu.Unlock()
+
+	return true, nil
 }

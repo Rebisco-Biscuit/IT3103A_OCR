@@ -37,6 +37,20 @@
   button.btn {
     background-color: #7B3538;
     color: #FBFCF5;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 2px 5px;
+  }
+
+  button.btn:hover {
+    background-color: #5A2224;
+    color: #FBFCF5;
+  }
+
+  .btn:disabled {
+    border-color: #fbfcf500 !important;
+  }
+
+  .modal-content {
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 2px 5px;
   }
 
   h6 {

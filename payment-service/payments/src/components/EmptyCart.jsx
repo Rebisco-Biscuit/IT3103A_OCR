@@ -14,10 +14,11 @@ export default function EmptyCart() {
             <tbody>
                 <tr>
                     <td colSpan="3" className="text-center">
-                        <img src={require('./openbook.png')} alt="openbook" width= '175px' style={{marginBottom: '40px', marginTop: '50px' }} />
-                        <br/>Looks like your cart is empty. <br/>
-                            <a style={{color: '#7B3538', fontWeight: 600, textDecoration: 'none'}} href="#">Enroll here</a>
-                        </td>
+                        <img src={require('./openbook.png')} alt="openbook" width="175px" style={{ marginBottom: '40px', marginTop: '50px' }} />
+                        <br />Looks like your cart is empty. <br />
+                        <a style={{ color: '#7B3538', fontWeight: 600, textDecoration: 'none' }} href="#">Enroll here</a>
+                        <br />
+                    </td>
                 </tr>
             </tbody>
         </table>

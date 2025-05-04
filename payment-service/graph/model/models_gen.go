@@ -8,6 +8,15 @@ import (
 	"strconv"
 )
 
+type CartItem struct {
+	ID         string  `json:"id"`
+	StudentID  string  `json:"studentId"`
+	CourseID   string  `json:"courseId"`
+	Price      float64 `json:"price"`
+	CourseName string  `json:"courseName"`
+	AddedAt    string  `json:"addedAt"`
+}
+
 type MockPayment struct {
 	ID          string   `json:"id"`
 	CardHolder  *string  `json:"cardHolder,omitempty"`

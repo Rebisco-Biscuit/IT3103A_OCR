@@ -1,6 +1,6 @@
 import '../custom.css';
 import React, { useState, useEffect } from "react";
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { gql, useMutation } from '@apollo/client';
 
 const CREATE_PAYMENT = gql`
@@ -72,11 +72,11 @@ export default function CheckoutModal({ user, totalPrice, cartItems = [], onPaym
       const price = course.price ? parseFloat(course.price) : 0;
 
       if (isNaN(price)) {
-        console.warn(`Invalid price for courseId ${course.id}:`, course.price);
+        console.warn(`Invalid price for courseId ${course.courseId}:`, course.price);
       }
 
       return {
-        courseId: course.id,
+        courseId: course.courseId,
         price: isNaN(price) ? 0 : price,
       };
     });
@@ -126,14 +126,41 @@ export default function CheckoutModal({ user, totalPrice, cartItems = [], onPaym
       const result = response.data.createPayment;
 
       if (result.status === "completed") {
-        alert("Payment successful!");
+        //alert("Payment successful!");
 
         // Close the modal programmatically
         const closeButton = document.querySelector(".btn-close[data-bs-dismiss='modal']");
         if (closeButton) {
           closeButton.click();
         }
+    
+        const successModal = document.createElement("div");
+        successModal.className = "modal fade";
+        successModal.id = "successModal";
+        successModal.tabIndex = -1;
+        successModal.setAttribute("aria-labelledby", "successModalLabel");
+        successModal.setAttribute("aria-hidden", "true");
+        successModal.innerHTML = `
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">Payment Successful</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                Your payment has been successfully processed.
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        `;
 
+        document.body.appendChild(successModal);
+        const modalInstance = new bootstrap.Modal(successModal);
+        modalInstance.show();
+        
         // Notify the parent component to clear the cart
         onPaymentSuccess();
       } else {
@@ -213,7 +240,7 @@ export default function CheckoutModal({ user, totalPrice, cartItems = [], onPaym
           <div className="modal-footer" style={{ justifyContent: "space-between" }}>
             <p className="text-start">
               Total Payment<br />
-              <b style={{ fontSize: "20px", fontWeight: "700", color: "#7B3538" }}>P{totalPrice.toFixed(2)}</b>
+              <b style={{ fontSize: "20px", fontWeight: "700", color: "#7B3538" }}>₱ {totalPrice.toFixed(2)}</b>
             </p>
             <button type="button" className="btn" onClick={handleConfirmPayment} disabled={loading}>
               {loading ? "Processing..." : "Confirm and pay"}
