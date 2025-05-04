@@ -28,3 +28,26 @@ func (r *subscriptionResolver) PaymentCreated(ctx context.Context, studentId str
 
 	return ch, nil
 }
+
+func (r *subscriptionResolver) CartUpdated(ctx context.Context, studentId string) (<-chan []*model.CartItem, error) {
+	log.Println("Subscription triggered for cart updates for studentId:", studentId)
+	ch := make(chan []*model.CartItem, 1)
+
+	r.Mu.Lock()
+	if _, exists := r.CartUpdatedChannels[studentId]; !exists {
+		r.CartUpdatedChannels[studentId] = ch
+	}
+	r.Mu.Unlock()
+
+	go func() {
+		<-ctx.Done()
+		r.Mu.Lock()
+		if r.CartUpdatedChannels[studentId] == ch {
+			delete(r.CartUpdatedChannels, studentId)
+		}
+		r.Mu.Unlock()
+		close(ch)
+	}()
+
+	return ch, nil
+}

@@ -29,7 +29,7 @@ var db *sql.DB
 func main() {
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000", "websocket://localhost:3000", "ws://localhost:3000"},
+		AllowedOrigins:   []string{"http://localhost:3000"},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
@@ -59,6 +59,7 @@ func main() {
 		Resolvers: &graph.Resolver{
 			DB:                     db,
 			PaymentCreatedChannels: make(map[string]chan *model.Payment),
+			CartUpdatedChannels:    make(map[string]chan []*model.CartItem),
 		},
 	}))
 

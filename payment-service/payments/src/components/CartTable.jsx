@@ -4,15 +4,20 @@ import React, { useState } from 'react';
 import CheckoutModal from './CheckoutModal';
 import EmptyCart from './EmptyCart'; // <- nukes the cart after successful payment
 
-export default function CartTable({ courses = [], totalPrice = 0, onPaymentSuccess }) {
-  const [isCartEmpty, setIsCartEmpty] = useState(false); // State to track if the cart is empty
+export default function CartTable({ courses = [], totalPrice = 0, onPaymentSuccess, onClearCart }) {
+  const [isCartEmpty, setIsCartEmpty] = useState(false); // track if cart is empty
+  const [currentPage, setCurrentPage] = useState(1); // pagination
+  const rowsPerPage = 8;
 
   const handlePaymentSuccess = () => {
-    setIsCartEmpty(true); // Set the cart to empty after a successful payment
+    setIsCartEmpty(true); // nuke the cart bro
     if (onPaymentSuccess) {
       onPaymentSuccess();
     }
   };
+
+  const startIdx = (currentPage - 1) * rowsPerPage;
+  const currentRows = courses.slice(startIdx, startIdx + rowsPerPage);
 
   return (
     <div className="nocontainer" style={{ marginTop: '20px' }}>
@@ -20,6 +25,16 @@ export default function CartTable({ courses = [], totalPrice = 0, onPaymentSucce
         <EmptyCart /> // Render EmptyCart if the cart is empty
       ) : (
         <>
+          {/* Clear Cart Button */}
+          <div style={{ marginBottom: '20px', textAlign: 'right' }}>
+            <button className ="btn"
+              onClick={onClearCart}
+            >
+              Clear Cart
+            </button>
+          </div>
+
+          {/* Cart Table */}
           <table className="table">
             <thead>
               <tr>
@@ -29,20 +44,42 @@ export default function CartTable({ courses = [], totalPrice = 0, onPaymentSucce
               </tr>
             </thead>
             <tbody>
-              {courses.map((course, index) => (
+              {currentRows.map((course, index) => (
                 <tr key={index}>
-                  <td>x {course.id}</td>
-                  <td>{course.description}</td>
+                  <td>x {course.courseId}</td>
+                  <td>{course.courseName}</td>
                   <td className="text-end">₱{course.price}</td>
                 </tr>
               ))}
             </tbody>
           </table>
 
-          <h5 style={{ fontWeight: 600 }} className="text-end">
+          <h5 style={{ fontWeight: 600, color: '#7B3538' }} className="text-end">
             TOTAL ₱{totalPrice.toFixed(2)}
           </h5>
 
+          {/* Pagination Controls */}
+      <div className="centerbtn">
+        <button
+          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+          disabled={currentPage === 1}
+          className="btn"
+        >
+          Previous
+        </button>
+        <span>Page {currentPage}</span>
+        <button
+          onClick={() =>
+            setCurrentPage((p) => (p * rowsPerPage < courses.length ? p + 1 : p))
+          }
+          disabled={currentPage * rowsPerPage >= courses.length}
+          className="btn"
+        >
+          Next
+        </button>
+      </div>
+
+          {/* Proceed to Checkout Button */}
           <div
             style={{
               marginTop: '25px',
@@ -61,10 +98,10 @@ export default function CartTable({ courses = [], totalPrice = 0, onPaymentSucce
             </button>
 
             <CheckoutModal
-              user={{ name: "Jane Doe", id: "12345" }}
+              user={{ name: 'Jane Doe', id: '12345' }}
               totalPrice={totalPrice}
               cartItems={courses}
-              onPaymentSuccess={handlePaymentSuccess} // Pass the success handler to CheckoutModal
+              onPaymentSuccess={handlePaymentSuccess}
             />
           </div>
         </>

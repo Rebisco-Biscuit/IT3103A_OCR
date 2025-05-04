@@ -14,7 +14,10 @@ return (
                 <span className="navbar-toggler-icon"></span>
             </button>
             <div className="collapse navbar-collapse" id="navbarNav">
-                <ul className="navbar-nav">
+                <ul className="navbar-nav me-auto">
+                    <li className="nav-item">
+                        <Link className="nav-link" to="/">Home</Link>
+                    </li>
                     <li className="nav-item dropdown">
                         <a className="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Payment Related
@@ -23,6 +26,11 @@ return (
                             <li><Link className="dropdown-item" to="/cart">Cart</Link></li>
                             <li><Link className="dropdown-item" to="/history">History</Link></li>
                         </ul>
+                    </li>
+                </ul>
+                <ul className="navbar-nav">
+                    <li className="nav-item">
+                        <Link className="nav-link" to="/">Sign out</Link>
                     </li>
                 </ul>
             </div>

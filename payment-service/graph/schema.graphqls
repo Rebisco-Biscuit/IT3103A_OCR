@@ -43,6 +43,7 @@ type MockPayment {
 type Query {
   getPayment(id: ID!): Payment
   listPayments: [Payment!]!
+  getCart(studentId: String!): [CartItem!]!
 }
 
 type Mutation {
@@ -57,6 +58,9 @@ type Mutation {
     phoneNumber: String,
     pin: String
   ): Payment!
+
+  addToCart(studentId: String!, courseId: String!, courseName: String!, price: Float!): CartItem!
+  removeFromCart(studentId: String!, courseId: String!): Boolean!
 }
 
 input PaymentItemInput {
@@ -79,4 +83,18 @@ extend type Query {
 
 type Subscription {
   paymentCreated(studentId: String!): Payment!
+  cartUpdated(studentId: String!): [CartItem!]!
+}
+
+type CartItem {
+  id: ID!
+  studentId: String!
+  courseId: String!
+  price: Float!
+  courseName: String!
+  addedAt: String!
+}
+
+extend type Mutation {
+  clearCart(studentId: String!): Boolean!
 }
