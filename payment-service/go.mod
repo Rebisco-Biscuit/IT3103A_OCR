@@ -3,10 +3,13 @@ module payment-mod/payment-service
 go 1.24.0
 
 require (
-	github.com/99designs/gqlgen v0.17.70
+	github.com/99designs/gqlgen v0.17.73
+	github.com/go-stomp/stomp v2.1.4+incompatible
 	github.com/lib/pq v1.10.9
-	github.com/vektah/gqlparser/v2 v2.5.23
+	github.com/vektah/gqlparser/v2 v2.5.26
 )
+
+require gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 // indirect
 
 require (
 	github.com/agnivade/levenshtein v1.2.1 // indirect

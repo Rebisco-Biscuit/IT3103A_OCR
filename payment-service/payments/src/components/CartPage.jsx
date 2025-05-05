@@ -31,6 +31,12 @@ const CART_UPDATED = gql`
   }
 `;
 
+const CART_REMOVEITEM = gql`
+  mutation RemoveFromCart($studentId: String!, $courseId: String!) {
+    removeFromCart(studentId: $studentId, courseId: $courseId)
+  }
+`;
+
 const CLEAR_CART = gql`
   mutation ClearCart($studentId: String!) {
     clearCart(studentId: $studentId)
@@ -38,47 +44,71 @@ const CLEAR_CART = gql`
 `;
 
 export default function CartPage() {
-  const studentId = '12345'; // will be replaced with the actual student ID
+  const studentId = '12345'; // Replace with the actual student ID
   const [cartItems, setCartItems] = useState([]);
 
-  // fetch initial cart items from course service
+  // Fetch initial cart items
   const { data: queryData, loading: queryLoading, error: queryError } = useQuery(GET_CART, {
     variables: { studentId },
     fetchPolicy: 'network-only',
   });
 
+  // Subscribe to cart updates
   const { data: subData } = useSubscription(CART_UPDATED, {
     variables: { studentId },
   });
 
+  // Mutation to clear the cart
   const [clearCart] = useMutation(CLEAR_CART, {
     variables: { studentId },
     onCompleted: () => {
       console.log('Cart cleared successfully after payment');
+      setCartItems([]); // Update the UI to reflect the empty cart
     },
     onError: (error) => {
       console.error('Failed to clear cart:', error);
     },
   });
 
+  // Mutation to remove a specific course from the cart
+  const [removeFromCart] = useMutation(CART_REMOVEITEM, {
+    onCompleted: () => {
+      console.log('Course removed from cart successfully');
+    },
+    onError: (error) => {
+      console.error('Failed to remove course from cart:', error);
+    },
+  });
+
+  // Update cart items when the query data is loaded
   useEffect(() => {
     if (queryData?.getCart) {
       setCartItems(queryData.getCart);
     }
   }, [queryData]);
 
+  // Update cart items when a subscription event is received
   useEffect(() => {
     if (subData?.cartUpdated) {
       setCartItems(subData.cartUpdated);
     }
   }, [subData]);
 
+  // Calculate total price dynamically
   const totalPrice = cartItems.reduce((total, item) => total + item.price, 0);
 
-  // clear the cart after payment
+  // Clear the cart after payment
   const handlePaymentSuccess = () => {
-    clearCart(); // automatically clear the cart after payment
-    setCartItems([]); // shows empty cart UI
+    clearCart(); // Automatically clear the cart after payment
+  };
+
+  // Remove a specific course from the cart
+  const handleRemoveItem = (studentId, courseId) => {
+    removeFromCart({
+      variables: { studentId, courseId },
+    });
+    // Update the cart items locally
+    setCartItems((prevItems) => prevItems.filter((item) => item.courseId !== courseId));
   };
 
   if (queryLoading) return <p>Loading your cart...</p>;
@@ -99,7 +129,8 @@ export default function CartPage() {
           courses={cartItems}
           totalPrice={totalPrice}
           onPaymentSuccess={handlePaymentSuccess} // Pass the success handler to CartTable
-          onClearCart={() => clearCart()} 
+          onClearCart={() => clearCart()} // Pass the clearCart handler
+          onRemoveItem={handleRemoveItem} // Pass the remove item handler
         />
       )}
     </div>

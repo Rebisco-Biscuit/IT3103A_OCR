@@ -7,6 +7,7 @@ import (
 	"os"
 	"payment-mod/payment-service/graph"
 	"payment-mod/payment-service/graph/model"
+	"payment-mod/payment-service/mq"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -24,9 +25,24 @@ import (
 
 const defaultPort = "8080"
 
-var db *sql.DB
-
 func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = defaultPort
+	}
+
+	dsn := "postgres://postgres:admin@localhost:5432/payment-service?sslmode=disable"
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		log.Fatal("Failed to connect to database:", err)
+	}
+	defer db.Close()
+
+	if err := db.Ping(); err != nil {
+		log.Fatal("Database connection is not alive:", err)
+	}
+
+	log.Println("Connected to PostgreSQL successfully")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
@@ -35,26 +51,6 @@ func main() {
 		AllowCredentials: true,
 	})
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = defaultPort
-	}
-
-	dsn := "postgres://postgres:admin@localhost:5432/payment-service?sslmode=disable"
-	var err error
-	db, err = sql.Open("postgres", dsn)
-	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
-	}
-	defer db.Close()
-
-	// Test connection
-	if err := db.Ping(); err != nil {
-		log.Fatal("Database connection is not alive:", err)
-	}
-
-	log.Println("Connected to PostgreSQL successfully")
-
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{
 			DB:                     db,
@@ -62,6 +58,8 @@ func main() {
 			CartUpdatedChannels:    make(map[string]chan []*model.CartItem),
 		},
 	}))
+
+	go mq.StartCartConsumer(db)
 
 	srv.AddTransport(transport.Websocket{
 		KeepAlivePingInterval: 10 * time.Second,
