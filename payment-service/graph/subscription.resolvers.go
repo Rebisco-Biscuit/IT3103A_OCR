@@ -38,7 +38,6 @@ func (r *subscriptionResolver) CartUpdated(ctx context.Context, studentId string
 		r.CartUpdatedChannels[studentId] = ch
 	}
 	r.Mu.Unlock()
-
 	go func() {
 		<-ctx.Done()
 		r.Mu.Lock()

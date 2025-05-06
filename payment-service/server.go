@@ -1,3 +1,4 @@
+// server.go (refactored)
 package main
 
 import (
@@ -6,7 +7,7 @@ import (
 	"net/http"
 	"os"
 	"payment-mod/payment-service/graph"
-	"payment-mod/payment-service/graph/model"
+	"payment-mod/payment-service/graph/resolver"
 	"payment-mod/payment-service/mq"
 	"time"
 
@@ -54,8 +55,8 @@ func main() {
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{
 			DB:                     db,
-			PaymentCreatedChannels: make(map[string]chan *model.Payment),
-			CartUpdatedChannels:    make(map[string]chan []*model.CartItem),
+			PaymentCreatedChannels: resolver.PaymentCreatedChannels,
+			CartUpdatedChannels:    resolver.CartUpdatedChannels,
 		},
 	}))
 

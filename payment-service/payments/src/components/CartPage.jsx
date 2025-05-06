@@ -24,12 +24,14 @@ const CART_UPDATED = gql`
       id
       studentId
       courseId
-      price
       courseName
+      price
       addedAt
     }
   }
 `;
+
+console.log('===CART_UPDATED', CART_UPDATED)
 
 const CART_REMOVEITEM = gql`
   mutation RemoveFromCart($studentId: String!, $courseId: String!) {
@@ -58,6 +60,7 @@ export default function CartPage() {
     variables: { studentId },
   });
 
+
   // Mutation to clear the cart
   const [clearCart] = useMutation(CLEAR_CART, {
     variables: { studentId },
@@ -83,16 +86,21 @@ export default function CartPage() {
   // Update cart items when the query data is loaded
   useEffect(() => {
     if (queryData?.getCart) {
+      console.log('===setCartItem?')
       setCartItems(queryData.getCart);
     }
   }, [queryData]);
-
+  console.log('===queryData', queryData);
+  console.log('===subDatam', subData)
   // Update cart items when a subscription event is received
+
   useEffect(() => {
-    if (subData?.cartUpdated) {
+    if (subData && subData.cartUpdated) {
+      console.log('===Data', subData);
       setCartItems(subData.cartUpdated);
     }
   }, [subData]);
+  
 
   // Calculate total price dynamically
   const totalPrice = cartItems.reduce((total, item) => total + item.price, 0);
