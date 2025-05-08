@@ -7,7 +7,7 @@ import EmptyCart from './EmptyCart'; // <- nukes the cart after successful payme
 export default function CartTable({ courses = [], totalPrice = 0, onPaymentSuccess, onClearCart, onRemoveItem }) {
   const [isCartEmpty, setIsCartEmpty] = useState(false); // track if cart is empty
   const [currentPage, setCurrentPage] = useState(1); // pagination
-  const rowsPerPage = 8;
+  const rowsPerPage = 5;
 
   const handlePaymentSuccess = () => {
     setIsCartEmpty(true); // Clear the cart
