@@ -36,8 +36,17 @@
 
   button.btn {
     background-color: #7B3538;
+    border-style: none;
     color: #FBFCF5;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 2px 5px;
+  }
+
+  button.btn.btn-primary {
+    background-color: #7B3538 !important;
+  }
+
+  button.btn.btn-secondary {
+    background-color: #9b6264 !important;
   }
 
   button.btn:hover {

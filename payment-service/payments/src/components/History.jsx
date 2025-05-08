@@ -136,23 +136,15 @@ const History = () => {
       </div>
 
       <div className="centerbtn">
-        <button
-          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-          disabled={currentPage === 1}
-          className="btn"
-        >
-          Previous
-        </button>
-        <span>Page {currentPage}</span>
-        <button
-          onClick={() =>
-            setCurrentPage((p) => (p * rowsPerPage < paymentHistory.length ? p + 1 : p))
-          }
-          disabled={currentPage * rowsPerPage >= paymentHistory.length}
-          className="btn"
-        >
-          Next
-        </button>
+        {Array.from({ length: Math.ceil(paymentHistory.length / rowsPerPage) }, (_, index) => (
+          <button
+            key={index + 1}
+            onClick={() => setCurrentPage(index + 1)}
+            className={`btn ${currentPage === index + 1 ? 'btn-primary' : 'btn-secondary'}`}
+          >
+            {index + 1}
+          </button>
+        ))}
       </div>
     </div>
   );

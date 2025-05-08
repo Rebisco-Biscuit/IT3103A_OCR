@@ -28,7 +28,7 @@ export default function CartTable({ courses = [], totalPrice = 0, onPaymentSucce
           {/* Clear Cart Button */}
           <div style={{ marginBottom: '20px', textAlign: 'right' }}>
             <button
-              className="btn"
+              className="btn btn-primary"
               onClick={onClearCart}
             >
               Clear Cart
@@ -74,23 +74,15 @@ export default function CartTable({ courses = [], totalPrice = 0, onPaymentSucce
 
           {/* Pagination Controls */}
           <div className="centerbtn">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-              className="btn"
-            >
-              Previous
-            </button>
-            <span>Page {currentPage}</span>
-            <button
-              onClick={() =>
-                setCurrentPage((p) => (p * rowsPerPage < courses.length ? p + 1 : p))
-              }
-              disabled={currentPage * rowsPerPage >= courses.length}
-              className="btn"
-            >
-              Next
-            </button>
+            {Array.from({ length: Math.ceil(courses.length / rowsPerPage) }, (_, index) => (
+              <button
+                key={index + 1}
+                onClick={() => setCurrentPage(index + 1)}
+                className={`btn btn-primary ${currentPage === index + 1 ? 'btn-primary' : 'btn-secondary'}`}
+              >
+                {index + 1}
+              </button>
+            ))}
           </div>
 
           {/* Proceed to Checkout Button */}
